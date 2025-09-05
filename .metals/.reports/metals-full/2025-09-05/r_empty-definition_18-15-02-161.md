@@ -1,3 +1,25 @@
+error id: file:///C:/Users/KIMJH/GitHub/COSE212-2025fall/scala-tutorial/src/main/scala/kuplrg/Implementation.scala:scala/collection/IterableOnceOps#isEmpty().
+file:///C:/Users/KIMJH/GitHub/COSE212-2025fall/scala-tutorial/src/main/scala/kuplrg/Implementation.scala
+empty definition using pc, found symbol in pc: scala/collection/IterableOnceOps#isEmpty().
+empty definition using semanticdb
+empty definition using fallback
+non-local guesses:
+	 -Tree.set.isEmpty.
+	 -Tree.set.isEmpty#
+	 -Tree.set.isEmpty().
+	 -BE.set.isEmpty.
+	 -BE.set.isEmpty#
+	 -BE.set.isEmpty().
+	 -set/isEmpty.
+	 -set/isEmpty#
+	 -set/isEmpty().
+	 -scala/Predef.set.isEmpty.
+	 -scala/Predef.set.isEmpty#
+	 -scala/Predef.set.isEmpty().
+offset: 1812
+uri: file:///C:/Users/KIMJH/GitHub/COSE212-2025fall/scala-tutorial/src/main/scala/kuplrg/Implementation.scala
+text:
+```scala
 package kuplrg
 
 object Implementation extends Template {
@@ -47,17 +69,11 @@ object Implementation extends Template {
       else n :: generate(f)(f(n))
 
   def join(l: Map[String, Int], r: Map[String, Int]): Map[String, Int] =
-    l ++ r.map {
-      case (k, v) =>
-        l.get(k) match {
-          case Some(v2) => (k, v + v2)
-          case None => (k, v)
-        }
-    }
+    l ++ r.map { case (k, v) => k -> (v + l.getOrElse(k, 0)) }
 
   def subsets(set: Set[Int]): List[Set[Int]] =
     def hp(set: Set[Int]): List[Set[Int]] = {
-      if set.isEmpty then List(Set())
+      if set.isE@@mpty then List(Set())
       else {
         val elem = set.max
         val rest = set - elem
@@ -69,12 +85,13 @@ object Implementation extends Template {
     def cmp(a: Set[Int], b: Set[Int]) = {
       val la = a.toList.sorted
       val lb = b.toList.sorted
-      val minLength = math.min(la.length, lb.length)
-      
-      for (i <- 0 until minLength) {
-        if (la(i) != lb(i)) return la(i) < lb(i)
+
+      val zipped = la.zipAll(lb, Int.MinValue, Int.MinValue)
+
+      zipped.find { case (x, y) => x != y } match {
+        case Some((x, y)) => x < y
+        case None => la.length < lb.length
       }
-      la.length < lb.length
     }
     hp(set).filter(_.nonEmpty).sortWith(cmp)
 
@@ -176,3 +193,9 @@ object Implementation extends Template {
       case Imply(l, r) => !eval(l, env) || eval(r, env)
     }
 }
+```
+
+
+#### Short summary: 
+
+empty definition using pc, found symbol in pc: scala/collection/IterableOnceOps#isEmpty().

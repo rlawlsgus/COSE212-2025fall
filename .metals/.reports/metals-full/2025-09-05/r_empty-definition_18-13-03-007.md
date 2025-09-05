@@ -1,3 +1,28 @@
+error id: file:///C:/Users/KIMJH/GitHub/COSE212-2025fall/scala-tutorial/src/test/scala/kuplrg/Spec.scala:`<none>`.
+file:///C:/Users/KIMJH/GitHub/COSE212-2025fall/scala-tutorial/src/test/scala/kuplrg/Spec.scala
+empty definition using pc, found symbol in pc: `<none>`.
+empty definition using semanticdb
+empty definition using fallback
+non-local guesses:
+	 -Implementation.Set.
+	 -Implementation.Set#
+	 -Implementation.Set().
+	 -Tree.Set.
+	 -Tree.Set#
+	 -Tree.Set().
+	 -BE.Set.
+	 -BE.Set#
+	 -BE.Set().
+	 -Set.
+	 -Set#
+	 -Set().
+	 -scala/Predef.Set.
+	 -scala/Predef.Set#
+	 -scala/Predef.Set().
+offset: 3178
+uri: file:///C:/Users/KIMJH/GitHub/COSE212-2025fall/scala-tutorial/src/test/scala/kuplrg/Spec.scala
+text:
+```scala
 package kuplrg
 
 import Implementation.*
@@ -109,24 +134,10 @@ class Spec extends SpecBase {
     ),
   )
   test(
-    subsets(Set(4,3,2,1)),
+    subsets(S@@et(1,3,2,4)),
     List(
-      Set(1),
-      Set(1, 2),
-      Set(1, 2, 3),
-      Set(1, 2, 3, 4),
-      Set(1, 2, 4),
-      Set(1, 3),
-      Set(1, 3, 4),
-      Set(1, 4),
-      Set(2),
-      Set(2, 3),
-      Set(2, 3, 4),
-      Set(2, 4),
-      Set(3),
-      Set(3, 4),
-      Set(4),
-    ),
+      
+    )
   )
 
   // ---------------------------------------------------------------------------
@@ -298,3 +309,10 @@ class Spec extends SpecBase {
 
   /* Write your own tests */
 }
+
+```
+
+
+#### Short summary: 
+
+empty definition using pc, found symbol in pc: `<none>`.

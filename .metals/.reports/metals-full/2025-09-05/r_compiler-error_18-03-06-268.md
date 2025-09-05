@@ -1,3 +1,16 @@
+file:///C:/Users/KIMJH/GitHub/COSE212-2025fall/scala-tutorial/src/main/scala/kuplrg/Implementation.scala
+### java.lang.AssertionError: assertion failed: position not set for nn(<empty>) # -1 of class dotty.tools.dotc.ast.Trees$Apply in C:/Users/KIMJH/GitHub/COSE212-2025fall/scala-tutorial/src/main/scala/kuplrg/Implementation.scala
+
+occurred in the presentation compiler.
+
+presentation compiler configuration:
+
+
+action parameters:
+offset: 2410
+uri: file:///C:/Users/KIMJH/GitHub/COSE212-2025fall/scala-tutorial/src/main/scala/kuplrg/Implementation.scala
+text:
+```scala
 package kuplrg
 
 object Implementation extends Template {
@@ -47,13 +60,7 @@ object Implementation extends Template {
       else n :: generate(f)(f(n))
 
   def join(l: Map[String, Int], r: Map[String, Int]): Map[String, Int] =
-    l ++ r.map {
-      case (k, v) =>
-        l.get(k) match {
-          case Some(v2) => (k, v + v2)
-          case None => (k, v)
-        }
-    }
+    l ++ r.map { case (k, v) => k -> (v + l.getOrElse(k, 0)) }
 
   def subsets(set: Set[Int]): List[Set[Int]] =
     def hp(set: Set[Int]): List[Set[Int]] = {
@@ -61,7 +68,7 @@ object Implementation extends Template {
       else {
         val elem = set.max
         val rest = set - elem
-        val withoutElem = hp(rest)
+        val withoutElem = subsets(rest)
         val withElem = withoutElem.map(s => s + elem)
         withElem ++ withoutElem
       }
@@ -69,14 +76,16 @@ object Implementation extends Template {
     def cmp(a: Set[Int], b: Set[Int]) = {
       val la = a.toList.sorted
       val lb = b.toList.sorted
-      val minLength = math.min(la.length, lb.length)
-      
-      for (i <- 0 until minLength) {
-        if (la(i) != lb(i)) return la(i) < lb(i)
+
+      val zipped = la.zipAll(lb, Int.MinValue, Int.MinValue)
+
+      zipped.find { case (x, y) => x != y } match {
+        case Some((x, y)) => x < y
+        case None => la.length < lb.length
       }
-      la.length < lb.length
     }
-    hp(set).filter(_.nonEmpty).sortWith(cmp)
+    val result = hp(set).filter(_.n@@)
+    hp(set).sortWith(cmp)
 
 
   // ---------------------------------------------------------------------------
@@ -176,3 +185,35 @@ object Implementation extends Template {
       case Imply(l, r) => !eval(l, env) || eval(r, env)
     }
 }
+```
+
+
+
+#### Error stacktrace:
+
+```
+scala.runtime.Scala3RunTime$.assertFailed(Scala3RunTime.scala:8)
+	dotty.tools.dotc.typer.Typer$.assertPositioned(Typer.scala:72)
+	dotty.tools.dotc.typer.Typer.typed(Typer.scala:3297)
+	dotty.tools.dotc.typer.Applications.extMethodApply(Applications.scala:2483)
+	dotty.tools.dotc.typer.Applications.extMethodApply$(Applications.scala:400)
+	dotty.tools.dotc.typer.Typer.extMethodApply(Typer.scala:119)
+	dotty.tools.dotc.typer.Applications.tryApplyingExtensionMethod(Applications.scala:2528)
+	dotty.tools.dotc.typer.Applications.tryApplyingExtensionMethod$(Applications.scala:400)
+	dotty.tools.dotc.typer.Typer.tryApplyingExtensionMethod(Typer.scala:119)
+	dotty.tools.dotc.interactive.Completion$Completer.tryApplyingReceiverToExtension$1(Completion.scala:526)
+	dotty.tools.dotc.interactive.Completion$Completer.$anonfun$23(Completion.scala:569)
+	scala.collection.immutable.List.flatMap(List.scala:294)
+	scala.collection.immutable.List.flatMap(List.scala:79)
+	dotty.tools.dotc.interactive.Completion$Completer.extensionCompletions(Completion.scala:566)
+	dotty.tools.dotc.interactive.Completion$Completer.selectionCompletions(Completion.scala:446)
+	dotty.tools.dotc.interactive.Completion$.computeCompletions(Completion.scala:218)
+	dotty.tools.dotc.interactive.Completion$.rawCompletions(Completion.scala:78)
+	dotty.tools.pc.completions.Completions.enrichedCompilerCompletions(Completions.scala:114)
+	dotty.tools.pc.completions.Completions.completions(Completions.scala:136)
+	dotty.tools.pc.completions.CompletionProvider.completions(CompletionProvider.scala:139)
+	dotty.tools.pc.ScalaPresentationCompiler.complete$$anonfun$1(ScalaPresentationCompiler.scala:150)
+```
+#### Short summary: 
+
+java.lang.AssertionError: assertion failed: position not set for nn(<empty>) # -1 of class dotty.tools.dotc.ast.Trees$Apply in C:/Users/KIMJH/GitHub/COSE212-2025fall/scala-tutorial/src/main/scala/kuplrg/Implementation.scala
