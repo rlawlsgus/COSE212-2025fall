@@ -11,7 +11,7 @@ object Implementation extends Template {
     else x
 
   def validName(name: String): Boolean =
-    if 0 < name.length && name.length <= 10 && 65 <= name(0).toInt && name(0).toInt <= 90 then true
+    if 0 < name.length && name.length <= 10 && 'A' <= name(0) && name(0) <= 'Z' then true
     else false
 
   // ---------------------------------------------------------------------------
@@ -66,15 +66,22 @@ object Implementation extends Template {
         withElem ++ withoutElem
       }
     }
-    def cmp(a: Set[Int], b: Set[Int]) = {
+    def cmp(a: Set[Int], b: Set[Int]): Boolean = {
       val la = a.toList.sorted
       val lb = b.toList.sorted
-      val minLength = math.min(la.length, lb.length)
-      
-      for (i <- 0 until minLength) {
-        if (la(i) != lb(i)) return la(i) < lb(i)
+      def compareLists(listA: List[Int], listB: List[Int]): Boolean = {
+        (listA, listB) match {
+          case (h1 :: t1, h2 :: t2) =>
+            if (h1 != h2) {
+              h1 < h2
+            } else {
+              compareLists(t1, t2)
+            }
+          case (Nil, _ :: _) => true
+          case _ => false
+        }
       }
-      la.length < lb.length
+      compareLists(la, lb)
     }
     hp(set).filter(_.nonEmpty).sortWith(cmp)
 
@@ -88,7 +95,7 @@ object Implementation extends Template {
     t match {
       case Leaf(_) => 0
       case Branch(l, _, r) => {
-        if heightOf(l) > heightOf(r) then 1 + heightOf(l) else 1 + heightOf(r)
+        if (heightOf(l) > heightOf(r)) then 1 + heightOf(l) else 1 + heightOf(r)
       }
     }
 
