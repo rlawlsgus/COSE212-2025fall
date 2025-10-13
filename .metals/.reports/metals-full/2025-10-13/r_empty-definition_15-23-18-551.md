@@ -1,3 +1,28 @@
+error id: file:///C:/Users/jh062/Documents/GitHub/COSE212-2025fall/mini-fsharp/src/main/scala/kuplrg/Implementation.scala:`<none>`.
+file:///C:/Users/jh062/Documents/GitHub/COSE212-2025fall/mini-fsharp/src/main/scala/kuplrg/Implementation.scala
+empty definition using pc, found symbol in pc: `<none>`.
+empty definition using semanticdb
+empty definition using fallback
+non-local guesses:
+	 -Expr.e1.
+	 -Expr.e1#
+	 -Expr.e1().
+	 -Value.e1.
+	 -Value.e1#
+	 -Value.e1().
+	 -Pattern.e1.
+	 -Pattern.e1#
+	 -Pattern.e1().
+	 -e1.
+	 -e1#
+	 -e1().
+	 -scala/Predef.e1.
+	 -scala/Predef.e1#
+	 -scala/Predef.e1().
+offset: 2654
+uri: file:///C:/Users/jh062/Documents/GitHub/COSE212-2025fall/mini-fsharp/src/main/scala/kuplrg/Implementation.scala
+text:
+```scala
 package kuplrg
 
 object Implementation extends Template {
@@ -7,7 +32,13 @@ object Implementation extends Template {
   // ---------------------------------------------------------------------------
   // Problem #1
   // ---------------------------------------------------------------------------
-  def extend(env: Env, p: Pattern, v: Value): Option[Env] = 
+  def lookup(env: Env, x: String): Value = 
+    env.get(x) match {
+      case Some(v) => v
+      case None => error("free identifier")
+    }
+
+  def tryMakeEnv(env: Env, p: Pattern, v: Value): Option[Env] = 
     (p, v) match {
       case (PId(x), _) => Some(env + (x -> v))
       case (PTuple(ps), TupleV(vs)) => 
@@ -16,48 +47,29 @@ object Implementation extends Template {
           ps.zip(vs).foldLeft(Some(env): Option[Env])((acc, pair) => 
             acc match {
               case None => None
-              case Some(e) => extend(e, pair._1, pair._2)
+              case Some(e) => tryMakeEnv(e, pair._1, pair._2)
             }
           )
         }
       case (PNil, ListV(Nil)) => Some(env)
       case (PCons(p1, p2), ListV(v1 :: v2s)) => 
-        extend(env, p1, v1).flatMap { env1 =>
-          extend(env1, p2, ListV(v2s))
+        tryMakeEnv(env, p1, v1).flatMap { env1 =>
+          tryMakeEnv(env1, p2, ListV(v2s))
         }
       case (PNum(n1), NumV(n2)) => 
         if (n1 == n2) Some(env) else None
       case (PBool(b1), BoolV(b2)) => 
         if (b1 == b2) Some(env) else None
       case (PNone, NoneV) => Some(env)
-      case (PSome(p1), SomeV(v1)) => extend(env, p1, v1)
+      case (PSome(p1), SomeV(v1)) => tryMakeEnv(env, p1, v1)
       case _ => None
-    }
-
-  def eq(e1: Value, e2: Value): Boolean =
-    (e1, e2) match {
-      case (NumV(n1), NumV(n2)) => n1 == n2
-      case (BoolV(b1), BoolV(b2)) => b1 == b2
-      case (ListV(vs1), ListV(vs2)) => 
-        if (vs1.length != vs2.length) false
-        else vs1.zip(vs2).forall(pair => eq(pair._1, pair._2))
-      case (TupleV(vs1), TupleV(vs2)) => 
-        if (vs1.length != vs2.length) false
-        else vs1.zip(vs2).forall(pair => eq(pair._1, pair._2))
-      case (NoneV, NoneV) => true
-      case (SomeV(v1), SomeV(v2)) => eq(v1, v2)
-      case _ => false
     }
   
   def interp(expr: Expr, env: Env): Value = 
     expr match {
       case ENum(n) => NumV(n)
       case EBool(b) => BoolV(b)
-      case EId(x) =>
-        env.get(x) match {
-          case Some(v) => v
-          case None => error("free identifier")
-        }
+      case EId(x) => lookup(env, x)
 
       case ENeg(e) => 
         interp(e, env) match {
@@ -88,7 +100,7 @@ object Implementation extends Template {
         }
 
       case EEq(e1, e2) => 
-        BoolV(eq(interp(e1, env), interp(e2, env)))
+        BoolV(interp(@@e1, env) == interp(e2, env))
       case ELt(e1, e2) =>
         (interp(e1, env), interp(e2, env)) match {
           case (NumV(n1), NumV(n2)) => BoolV(n1 < n2)
@@ -115,7 +127,7 @@ object Implementation extends Template {
 
       case ELet(p, v, s) =>
         val value = interp(v, env)
-        val newEnv = extend(env, p, value)
+        val newEnv = tryMakeEnv(env, p, value)
         newEnv match {
           case Some(e) => interp(s, e)
           case None => error("invalid pattern match")
@@ -134,7 +146,7 @@ object Implementation extends Template {
           case CloV(p, b, getClosureEnv) => 
             val argValue = interp(a, env)
             val closureEnv = getClosureEnv()
-            val newEnv = extend(closureEnv, p, argValue)
+            val newEnv = tryMakeEnv(closureEnv, p, argValue)
             newEnv match {
               case Some(e) => interp(b, e)
               case None => error("invalid pattern match")
@@ -149,7 +161,7 @@ object Implementation extends Template {
           cases match {
             case Nil => error("unmatched value")
             case Case(p: Pattern, b: Expr) :: rest => 
-              extend(env, p, v) match {
+              tryMakeEnv(env, p, v) match {
                 case Some(newEnv) => interp(b, newEnv)
                 case None => tryMatch(rest)
               }
@@ -163,8 +175,8 @@ object Implementation extends Template {
   def hanoiMovesBody: String = """
     let rec append l1 l2 =
         match l1 with
-        | [] -> l2
-        | h :: t -> (h :: (append t l2))
+ [] -> l2
+ h :: t -> (h :: (append t l2))
     in
     let rec innerHanoiMoves n source temp target =
         if n = 0 then
@@ -178,3 +190,10 @@ object Implementation extends Template {
     innerHanoiMoves n source temp target
   """
 }
+
+```
+
+
+#### Short summary: 
+
+empty definition using pc, found symbol in pc: `<none>`.
